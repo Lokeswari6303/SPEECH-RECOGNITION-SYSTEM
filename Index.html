@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Speech Recognition System for Device Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        pre {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Speech Recognition System for Device Control</h1>
+    <p>This Python script uses voice commands to control an LED connected to a Raspberry Pi.</p>
+
+    <pre><code>import speech_recognition as sr
+from gpiozero import LED
+from time import sleep
+
+# Setup
+led = LED(17)
+recognizer = sr.Recognizer()
+
+def listen_for_command():
+    with sr.Microphone() as source:
+        print("Listening for command...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+
+        try:
+            command = recognizer.recognize_google(audio).lower()
+            print(f"Recognized Command: {command}")
+            return command
+        except sr.UnknownValueError:
+            print("Could not understand audio.")
+            return ""
+        except sr.RequestError as e:
+            print(f"Error with request: {e}")
+            return ""
+
+def control_device(command):
+    if "turn on" in command or "light on" in command:
+        print("Turning LED ON")
+        led.on()
+    elif "turn off" in command or "light off" in command:
+        print("Turning LED OFF")
+        led.off()
+    else:
+        print("Command not recognized for device control.")
+
+# Main Loop
+if __name__ == "__main__":
+    try:
+        while True:
+            cmd = listen_for_command()
+            if cmd:
+                control_device(cmd)
+            sleep(1)
+    except KeyboardInterrupt:
+        print("Exiting...")
+        led.off()
+</code></pre>
+</body>
+</html>
